@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/css/style.css">
+<head>
+    <meta charset="UTF-8">
+    <!-- 下面一行用于移动设备自适应宽度 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>在线记事本</title>
+</head>
+<body>
+<div class="container width-limit" style="margin-top: 16px">
+    <div class="col-lg-12">
+        <div id="qrcode"></div>
+    </div>
+    <div class="col-lg-12">
+        <small id="infoText"></small>
+    </div>
+    <div class="col-lg-12">
+        <button class="btn btn-info btn-block btn-lg" id="getQRCode" style="margin: 1rem 0 1rem 0">新建</button>
+    </div>
+</div>
+
+</body>
+<script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/static/js/qrcode.min.js"></script>
+
+<script type="text/javascript">
+    var getQRCode = document.getElementById("getQRCode");
+    var QRCodeIMG = document.getElementById("qrcode");
+    var infoText = document.getElementById("infoText");
+    var memoId = 123456;
+    getQRCode.addEventListener('click', function () {
+        $.ajax({
+            type: "GET",
+            url: window.location.origin+"/api/create",
+            dataType: "json",
+            success: function (data) {
+                //清空二维码图片，并且暂时隐藏图片
+                QRCodeIMG.innerHTML = "";
+                QRCodeIMG.style.display = "none";
+
+                //创建二维码Object
+                var qrcode = new QRCode(QRCodeIMG, {
+                    width: 512,
+                    height: 512,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                //生成二维码
+                qrcode.makeCode(window.location.origin + "/edit/" + data.id + "/" + data.token);
+
+                //添加自定义样式
+                QRCodeIMG.lastChild.classList.add("qrcode");
+
+                //添加Bootstrap样式
+                QRCodeIMG.lastChild.classList.add("img-responsive");
+                QRCodeIMG.lastChild.classList.add("img-thumbnail");
+
+                //延时显示，等待样式应用到DOM元素
+                setTimeout(function () {
+                    QRCodeIMG.style.display = "";
+                }, 50);
+
+                //更改提示文本
+                infoText.innerHTML = "请保存二维码以便下次编辑";
+            }
+        })
+    });
+</script>
+</html>
